@@ -49,9 +49,21 @@ def correct_cluster(args):
 
 class MHT:
     """MHT class."""
-
+	# This creates the MHT construct which is the struct for keeping tracked objects in the timeseries.
+	# Paramters:
+	# - self 				: just a way to reference itself.
+	# - cparams 			: the parameters for the cluster it creates (defaulted to NONE)
+	#       - k_max : the k value for evaluating a hypothesis
+        #       - nll_limit : limit the negative log likelihood score
+        #       - hp_limit : limit the ongoing hypotheses
+	# - matching_algorithm  :
+	#       - naive
+	#       - rtree 
+	# - dbfile 				: The sqlite3 file where the data will be stored. 
+	
     def __init__(self, cparams=None, matching_algorithm=None,
                  dbfile=':memory:'):
+		
         """Init."""
         self.matching_algorithm = matching_algorithm
         self.cparams = cparams if cparams else ClusterParameters()
@@ -89,7 +101,7 @@ class MHT:
             "min_y  REAL,"
             "max_y  REAL,"
             "data   BLOB"
-            ");")
+            ");")	
         if self.matching_algorithm == "rtree":
             self.db.execute("CREATE VIRTUAL TABLE IF NOT EXISTS cluster_index"
                             " USING rtree(id, min_x, max_x, min_y, max_y);")

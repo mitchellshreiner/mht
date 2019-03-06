@@ -44,7 +44,7 @@ ClusterParameters.init_target_tracker = DefaultTargetInit(0.1, 0.1)
 
 
 class Cluster:
-    """MHT class."""
+    """Cluster class."""
 
     def __init__(self, initer):
         """Init."""

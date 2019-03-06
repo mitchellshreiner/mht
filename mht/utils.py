@@ -88,7 +88,7 @@ def cov_ellipse(cov, nstd):
 
 
 def gaussian_bbox(x, P, nstd=2):
-    """Return boudningbox for gaussian."""
+    """Return boundingbox for gaussian."""
     r1, r2, theta = cov_ellipse(P, nstd)
     ux = r1 * cos(theta)
     uy = r1 * sin(theta)
