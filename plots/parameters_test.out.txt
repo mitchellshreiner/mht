@@ -1,0 +1,3 @@
+             IDF1  IDP  IDR  Rcll  Prcn GT MT PT ML  FP   FN IDs   FM   MOTA   MOTP
+MOT17-10-SDP 2.5% 3.5% 2.1% 33.7% 49.6% 37  2 21 14 784 1518 728  301 -32.3% 12.959
+
