@@ -104,7 +104,7 @@ def run_test(num_frames=100, match_alg_str="naive", debug=1):
     #setup the tracker with cluster values
     tracker = mht.MHT(
         cparams=mht.ClusterParameters(k_max=100 ,nll_limit=10, hp_limit=5),
-        matching_algorithm="rtree")
+        matching_algorithm="naive")
     
     #the variables
     hyps = None
@@ -112,7 +112,6 @@ def run_test(num_frames=100, match_alg_str="naive", debug=1):
     ntargets_true = []
     ntargets = []
     nhyps = []
-    debug_dictionary = {}
     k = 0
     #for loop for the frames
     for report in frames:
@@ -122,7 +121,7 @@ def run_test(num_frames=100, match_alg_str="naive", debug=1):
             #np.random.multivariate_normal(t, np.diag([0.1, 0.1])),  # noqa
             # t[0:2],
             t,
-            np.eye(2) * 20.0,
+            np.eye(2) * 10.0,
             # np.ones((2,2)) * 20.0,
             mht.models.position_measurement,
             i)
@@ -136,16 +135,15 @@ def run_test(num_frames=100, match_alg_str="naive", debug=1):
         #Calculate the difference between the object related points
         #and the hypotheis related points
 
-        #debug dictionary format: frame #, gt objects, # tracks  
         if debug == 1:
-            #print(' Number of Global Hypotheses')
-            #print(list(tracker.global_hypotheses())[len(list(tracker.global_hypotheses()))-1])
-            #print(' gt objects ')
-            #print(len(gt_frames[k]))
+            print(' Number of Global Hypotheses')
+            print(len(list(tracker.global_hypotheses())))
+            print(' gt objects ')
+            print(len(gt_frames[k]))
             # print('Targets')
             # print(list(tracker.global_hypotheses())[0].targets)
             # print('Num Targets tracker')
-            print(len(list(tracker.global_hypotheses())))
+            # print(len(list(tracker.global_hypotheses())[0].targets))
             # print('Num detections in reports')
             # print(len(list(reports)))
             # print('Num Targets ground truth')
@@ -153,12 +151,7 @@ def run_test(num_frames=100, match_alg_str="naive", debug=1):
 
 
         #how to get the bb_left and bb_top from a track filter
-        # if k == 1:
-        #     trs = list(list(tracker.global_hypotheses())[4].tracks)
-        # else:   
-        # trs = list(list(tracker.global_hypotheses())[len(list(tracker.global_hypotheses()))-1].tracks)
         trs = list(list(tracker.global_hypotheses())[0].tracks)
-
         trs.sort(key=takeID)
 
         h_trs = []
