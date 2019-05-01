@@ -26,8 +26,6 @@ def run_test():
 
     # Gets list of files in directory 
     files = os.listdir('../data/train')
-    # for name in files:
-    #     print(name)
 
     metric_strs = []
 
@@ -37,9 +35,7 @@ def run_test():
     #     print(value)
     acc = mm.MOTAccumulator(auto_id = True)
     mh = mm.metrics.create()
-
-
-
+    
     # Run through each of the datasets. 
     for dataset in files:
         #print('Dataset: '+dataset)
@@ -67,7 +63,7 @@ def run_test():
         gt_frames = []
 
         #Only going through the first N frames of video
-        for i in range(1, 600):
+        for i in range(1, 100):
             detections = []
             # add all the detections for a single scan
             while(detFile['frame'][det_indexes[index]] == i):
@@ -87,9 +83,8 @@ def run_test():
 
         #setup the tracker with cluster values
         tracker = mht.MHT(
-            cparams=mht.ClusterParameters(k_max=100 ,nll_limit=10, hp_limit=10),
-            matching_algorithm="naive",
-            dbfile='sqlitedbs/mot_test_3_db.sqlite')        
+            cparams=mht.ClusterParameters(k_max=100 ,nll_limit=4, hp_limit=5),
+            matching_algorithm="naive")        
         
         #the variables
         hyps = None
@@ -156,12 +151,12 @@ def run_test():
                         C # the distance matrix
                     )
 
-            # if k <= 5:
-                #print(list(tracker.global_hypotheses()))
-                #print(h)
-                #print(o)
-                #print(C)
-                #print(acc.mot_events.loc[frameid])
+            if k <= 5:
+                print(list(tracker.global_hypotheses()))
+                print(h)
+                print(o)
+                print(C)
+                print(acc.mot_events.loc[frameid])
 
             k = k + 1
         

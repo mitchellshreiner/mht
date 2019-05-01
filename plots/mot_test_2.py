@@ -67,11 +67,11 @@ def run_test():
         gt_frames = []
 
         #Only going through the first N frames of video
-        for i in range(1, 200):
+        for i in range(1, num_frames):
             detections = []
             # add all the detections for a single scan
             while(detFile['frame'][det_indexes[index]] == i):
-                detections.append(np.array([detFile['bb_left'][det_indexes[index]], detFile['bb_top'][det_indexes[index]]]))
+                detections.append(np.array([detFile['bb_left'][det_indexes[index]], detFile['bb_top'][det_indexes[index]], 1.0]))
                 index = index + 1
             frames.append(detections)
 
@@ -88,7 +88,7 @@ def run_test():
         #setup the tracker with cluster values
         tracker = mht.MHT(
             cparams=mht.ClusterParameters(k_max=100 ,nll_limit=10, hp_limit=10),
-            matching_algorithm="naive")        
+            matching_algorithm="rtree")        
         
         #the variables
         hyps = None
@@ -103,9 +103,9 @@ def run_test():
 
             #tracker setup and increment
             reports = {mht.Report(
-                np.random.multivariate_normal(t, np.diag([0.1, 0.1])),  # noqa
+                #np.random.multivariate_normal(t, np.diag([0.1, 0.1])),  # noqa
                 # t[0:2],
-                #t,
+                t[0:2],
                 np.eye(2) * 0.001,
                 mht.models.position_measurement,
                 i)
@@ -120,7 +120,7 @@ def run_test():
             #how to get the bb_left and bb_top from a track filter
             trs = list(list(tracker.global_hypotheses())[0].tracks)
             trs.sort(key=takeID)
-
+            
             h_trs = []
             for f in trs:
                 h_trs.append(getXY(f))
@@ -132,9 +132,9 @@ def run_test():
                 o_trs.append(f[1])
             o = np.array(o_trs)
 
-            C = mm.distances.norm2squared_matrix(o, h, max_d2=30.0)    
+            C = mm.distances.norm2squared_matrix(o, h, max_d2=1000.0)    
 
-            #Get the ground truth objects
+            #Get the ground truth objects ids
             gt_objects = []
             temp = []
             for f in gt_frames[k]:
