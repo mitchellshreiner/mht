@@ -2,8 +2,8 @@
 import motmetrics as mm
 import os
 import sys
-import csv
 import time
+import csv
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
@@ -23,7 +23,7 @@ def getXY(elem):
     return [elem.filter.x[0], elem.filter.x[1]]
 
 
-def run_test(run_frames=100, dataset="MOT17-10-SDP", debug=1):
+def run_test(run_frames=100, dataset="MOT17-10-SDP", debug=1, time=True):
     """Run through training sets"""
 
     # Gets list of files in directory 
@@ -69,10 +69,6 @@ def run_test(run_frames=100, dataset="MOT17-10-SDP", debug=1):
     gt_list = gtFileSorted.index.values.tolist()
     frames = []
     gt_frames = []
-    endtime = time.time()
-
-    #set start time 
-    start_time = time.time()
 
     #Only going through the first N frames of video
     for i in range(1, num_frames):
@@ -122,6 +118,11 @@ def run_test(run_frames=100, dataset="MOT17-10-SDP", debug=1):
     nhyps = []
     debug_dictionary = []
     k = 0
+    runtime = time.time()
+
+    #set start time 
+    start_time = time.time()
+
     #for loop for the frames
     for report in frames:
         print('Frame:',k)
@@ -150,9 +151,9 @@ def run_test(run_frames=100, dataset="MOT17-10-SDP", debug=1):
         debug_dictionary.append({
             'Frame' : k,
             'GT objects' : len(gt_frames[k]),
-            'Reports' : len(report),
+            'reports' : len(report),
             'Targets' : len(list(tracker.global_hypotheses())[0].targets),
-            'Global Hypotheses' : len(list(tracker.global_hypotheses()))
+            'Global Hyp' : len(list(tracker.global_hypotheses()))
         })
         if debug == 1:
             print(debug_dictionary[k])
@@ -169,6 +170,12 @@ def run_test(run_frames=100, dataset="MOT17-10-SDP", debug=1):
             # print('Num Targets ground truth')
             # print(len(gt_frames[k]))
 
+
+        #how to get the bb_left and bb_top from a track filter
+        # if k == 1:
+        #     trs = list(list(tracker.global_hypotheses())[4].tracks)
+        # else:   
+        # trs = list(list(tracker.global_hypotheses())[len(list(tracker.global_hypotheses()))-1].tracks)
         trs = list(list(tracker.global_hypotheses())[0].tracks)
 
         trs.sort(key=takeID)
@@ -209,30 +216,34 @@ def run_test(run_frames=100, dataset="MOT17-10-SDP", debug=1):
                     C # the distance matrix
                 )
 
-        
+        # if k <= 5:
+        #     print(list(tracker.global_hypotheses()))
+        #     # print(h)
+        #     # print(o)
+        #     print(acc.mot_events.loc[frameid])
+
         if k == (num_frames-2):
-            endtime = time.time()
+            end_time = time.time()
 
+        #update the k value 
         k = k + 1
-
     
-
+        
         mht.plot.plot_scan(this_scan)
         plt.plot([t[0] for t in o_trs],
                  [t[1] for t in o_trs],
                  marker='D', color='y', alpha=.5, linestyle='None')
-    print("RUNTIME: ", endtime-start_time)
-
-    #plot the hypotheses
     mht.plot.plot_hyptrace(list(tracker.global_hypotheses())[0], covellipse=True)
     mht.plot.plt.axis([-1, 1920,  1080, -1])
     mht.plot.plt.ylabel('Y')
     mht.plot.plt.xlabel('X')
 
+    print("Runtime: ", start_time-end_time)
+
     toCSV = debug_dictionary
     keys = toCSV[0].keys()
 
-    with open('./debug/'+dataset+'_frame_info.csv', 'w+') as output_file:
+    with open(dataset+'frame_info.csv', 'w') as output_file:
         dict_writer = csv.DictWriter(output_file, keys)
         dict_writer.writeheader()
         dict_writer.writerows(toCSV)
@@ -274,6 +285,7 @@ def parse_args(*argv):
     parser.add_argument('--frames', help="type the number of frames you want to search through dataset", default=0, type=int)
     parser.add_argument('--dataset', help="String of folder for dataset to be used", default="MOT17-10-SDP", type=str)
     parser.add_argument('--show', action="store_true")
+    #parser.add_argument('debug', type=int)
     return parser.parse_args(argv)
 
 
@@ -288,7 +300,7 @@ def main(*argv):
         plt.show()
     else:
         run_test(args.frames, args.dataset)
-        plt.gcf().savefig("./figures/"+args.dataset+os.path.splitext(os.path.basename(__file__))[0],
+        plt.gcf().savefig(args.dataset+os.path.splitext(os.path.basename(__file__))[0],
                           bbox_inches='tight')
 
 if __name__ == '__main__':

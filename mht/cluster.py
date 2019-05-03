@@ -26,7 +26,7 @@ from collections import defaultdict
 from .target import Target
 from .clusterhyp import ClusterHypothesis
 from .hypgen import murty, permgen
-from .utils import PrioItem, connected_components, LARGE
+from .utils import PrioItem, connected_components, LARGE, TIMEOUT
 from .kf import DefaultTargetInit
 
 
@@ -40,7 +40,7 @@ class ClusterParameters:
 
 ClusterParameters.k_max = 100
 ClusterParameters.hp_limit = LARGE
-ClusterParameters.init_target_tracker = DefaultTargetInit(0.1, 0.1)
+ClusterParameters.init_target_tracker = DefaultTargetInit(5.0, 5.0)
 
 
 class Cluster:
@@ -177,7 +177,11 @@ class Cluster:
             (ClusterHypothesis.new(ph, hyp, scan.sensor)
              for ph, hyp in hlimit(self._assignment_hypotheses(scan, new_ts)))
             if len(ch.tracks) > 0})))
+        #print("Generated new hypotheses")
+
         self.normalise()
+
+        #print("normalised")
 
         # Handle created targets and assignments
         self.targets = list({t for h in self.hypotheses for t in h.targets})
@@ -186,12 +190,16 @@ class Cluster:
             target.finalize_assignment({tr for tr in tracks
                                         if tr.target is target})
 
+        #print("handled created targets")
+
         # Find tracks from reports that were assigned to multiple targets
         self.ambiguous_tracks = [
             set().union(*(tr.children.values() for tr in atrs)) & tracks
             for atrs in self.ambiguous_tracks]
         self.ambiguous_tracks = [atrs for atrs in self.ambiguous_tracks
                                  if len({tr.target for tr in atrs}) > 1]
+        #print("found ambiguous tracks")
+
         for r in scan.reports:
             if len({tr.target for tr in r.assigned_tracks}) > 1:
                 self.ambiguous_tracks.append(r.assigned_tracks)
@@ -256,7 +264,7 @@ class Cluster:
         a = next(m)
         last_item = PrioItem(a[0], (a, ph, m))
         Q.put(last_item)
-        while not Q.empty():
+        while (not Q.empty()):
             item = Q.get_nowait()
             if item == last_item:
                 ph, m = next(murties, (None, None))
@@ -266,7 +274,7 @@ class Cluster:
                     Q.put(last_item)
             a, ph, m = item.data
             next_break = Q.queue[0].prio if not Q.empty() else LARGE
-            while a and a[0] <= next_break:
+            while a and (a[0] <= next_break):
                 r = list(a[1])
                 yield ph, a[0], r
                 a = next(m, None)

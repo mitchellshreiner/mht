@@ -1,0 +1,4 @@
+TOTAL FRAMES: 269
+              IDF1   IDP   IDR  Rcll  Prcn GT MT PT ML  FP   FN IDs   FM  MOTA   MOTP
+MOT17-05-DPM 19.2% 31.3% 14.3% 23.9% 48.8% 36  0 19 17 564 1710  91  104 -5.3% 68.649
+

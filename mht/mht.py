@@ -35,6 +35,7 @@ def cluster_initer_factory(tracker, cparams):
 
 def predict_cluster(args):
     """Perform parallel time update on cluster."""
+    #print("predict cluster")
     (cluster, dT) = args
     cluster.predict(dT)
     return cluster
@@ -42,8 +43,10 @@ def predict_cluster(args):
 
 def correct_cluster(args):
     """Update cluster from multithread process."""
+    #print("correct cluster")
     (scan, cluster) = args
     cluster.register_scan(scan)
+    #print("returns from cluster register_scan")
     return cluster
 
 
@@ -237,6 +240,8 @@ class MHT:
             c.assigned_reports = set()
             yield (c, a)
 
+        #print("Gets out of _cluster")
+
     def predict(self, dT, bbox=None):
         """Move to next timestep."""
         self._load_clusters(bbox)
@@ -252,7 +257,10 @@ class MHT:
                 correct_cluster,
                 ((Scan(scan.sensor, cr), c)
                  for c, cr in self._cluster(scan))))
+
+        #print("done setting active_clusters")
         self._split_clusters()
+        #print("done splitting clusters")
         self._save_clusters()
 
     def global_hypotheses(self, bbox=None):

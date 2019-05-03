@@ -16,6 +16,7 @@
 """
 
 LARGE = 10000
+TIMEOUT = 30
 import numpy as np
 from math import sin, cos, pi, sqrt
 
